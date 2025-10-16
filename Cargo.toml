@@ -1,0 +1,11 @@
+[package]
+name = "leptos-pdf"
+version = "0.1.0"
+edition = "2024"
+license-file = "LICENSE"
+authors = ["Dylan Manuel"]
+
+[dependencies]
+leptos = "0.8.10"
+wasm-bindgen = "0.2.104"
+wasm-bindgen-futures = "0.4.54"

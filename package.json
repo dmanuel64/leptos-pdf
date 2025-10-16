@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "pdfjs-dist": "^5.4.296",
+    "vite": "^7.1.10"
+  }
+}

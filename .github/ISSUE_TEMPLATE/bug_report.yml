@@ -1,0 +1,32 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: What happened? What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this bug?
+      placeholder: |
+        1. Run command `...`
+        2. Load file `...`
+        3. See error `...`
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Python Version
+      placeholder: "e.g. 3.11"
+
+  - type: input
+    attributes:
+      label: OS and Environment
+      placeholder: "e.g. Ubuntu 22.04, Windows 11"
