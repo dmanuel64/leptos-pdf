@@ -1,1 +1,1 @@
-mod pdf;
+pub mod pdfjs;
