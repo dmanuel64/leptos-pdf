@@ -1,9 +1,11 @@
 [package]
 name = "leptos-pdf"
+description = "Leptos components for rendering and viewing PDFs in the browser."
 version = "0.1.0"
 edition = "2024"
 license-file = "LICENSE"
 authors = ["Dylan Manuel"]
+repository = "https://github.com/dmanuel64/leptos-pdf"
 include = [
     "/src/**",
     "/bundled_javascript/**",
