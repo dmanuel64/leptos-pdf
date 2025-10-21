@@ -2,6 +2,7 @@ use crate::bindings::pdfjs;
 use leptos::{prelude::*, task::spawn_local};
 use uuid::Uuid;
 
+
 #[component]
 pub fn PdfRenderer(
     #[prop(into)] url: MaybeProp<String>,
@@ -58,9 +59,10 @@ pub fn PdfRenderer(
     });
 
     view! {
+        <style>{include_str!("../../styles/pdf_renderer.scss")}</style>
         <div class="pdf-layers" id=format!("pdf-renderer-{id}")>
             <div class="pdf-layer__canvas">
-                <canvas id=canvas_id style:position="absolute" />
+                <canvas id=canvas_id />
             </div>
             <div class="pdf-layer__text" id=text_layer_id />
         </div>
