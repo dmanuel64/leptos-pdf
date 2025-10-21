@@ -12,17 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Build JavaScript with Vite
-        run: npx vite build
-
       - name: Publish to crates.io
         run: cargo publish
         env:
