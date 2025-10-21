@@ -1,4 +1,4 @@
 mod bindings;
 pub mod components;
 
-pub use components::PdfViewer;
+pub use components::PdfRenderer;

@@ -1,3 +1,3 @@
-mod pdf_viewer;
+mod pdf_renderer;
 
-pub use pdf_viewer::PdfViewer;
+pub use pdf_renderer::PdfRenderer;

@@ -1,7 +1,93 @@
 <!DOCTYPE html>
 <html>
 
-<head></head>
+<head>
+    <style>
+        #root {
+            font-family: Avenir, Helvetica, Arial, sans-serif;
+            --scale-round-x: 1px;
+            --scale-round-y: 1px;
+        }
+
+        .page-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 590px;
+            margin: 0 auto 15px;
+        }
+
+        .pdf-layers {
+            position: relative;
+
+            .pdf-layer__canvas {
+                inset: 0;
+                position: absolute;
+            }
+
+            .pdf-layer__text {
+                inset: 0;
+                position: absolute;
+                opacity: 1;
+                line-height: 1;
+
+                z-index: 5;
+
+                br::selection {
+                    color: transparent;
+                }
+
+                span {
+                    color: transparent;
+                    cursor: text;
+                    position: absolute;
+                    transform-origin: 0% 0%;
+                    white-space: pre;
+
+                    &::selection {
+                        background-color: black;
+                        color: yellow;
+                    }
+                }
+            }
+
+            .pdf-layer__annotation {
+                position: relative;
+                pointer-events: none;
+
+                section {
+                    position: absolute;
+                    text-align: initial;
+                    pointer-events: auto;
+                    box-sizing: border-box;
+
+                    &:not(.popupAnnotation) {
+                        z-index: 6 !important;
+                    }
+
+                    &:has(div.annotationContent) {
+                        canvas.annotationContent {
+                            display: none;
+                        }
+                    }
+
+                    a {
+                        height: 100%;
+                        left: 0;
+                        position: absolute;
+                        top: 0;
+                        width: 100%;
+                        cursor: pointer;
+
+                        &:hover {
+                            background-color: rgba(99, 39, 245, 0.3);
+                        }
+                    }
+                }
+            }
+        }
+    </style>
+</head>
 
 <body></body>
 <!-- Static assets -->

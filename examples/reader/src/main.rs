@@ -1,11 +1,13 @@
 use leptos::prelude::*;
-use leptos_pdf::PdfViewer;
+use leptos_pdf::PdfRenderer;
 
 #[component]
 fn App() -> impl IntoView {
     view! {
-        <main style="width: 100%; height: 100vh;">
-            <PdfViewer url="/public/sample.pdf"/>
+        <main>
+            <div style:width="100vw" style:height="100vh">
+            <PdfRenderer url="/public/sample.pdf"/>
+            </div>
         </main>
     }
 }
