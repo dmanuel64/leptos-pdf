@@ -170,6 +170,3 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
-
-# Bundled Javascript
-/bundled_javascript

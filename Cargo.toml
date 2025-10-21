@@ -6,6 +6,8 @@ license-file = "LICENSE"
 authors = ["Dylan Manuel"]
 include = [
     "/src/**",
+    "/bundled_javascript/**",
+    "/styles/**",
     "/Cargo.toml",
     "/README.md",
     "/LICENSE",
