@@ -4,8 +4,6 @@
 
 It provides an idiomatic Leptos interface for embedding PDFs in your Rust + WebAssembly applications - complete with canvas-based renderings, text selection, and reactive props for paging and scaling.
 
----
-
 ## Installation
 
 Add `leptos-pdf` to your Leptos project:
@@ -13,8 +11,6 @@ Add `leptos-pdf` to your Leptos project:
 ```shell
 cargo add leptos-pdf
 ```
-
----
 
 ## Example
 
@@ -37,8 +33,6 @@ fn main() {
 ```
 
 Will render the `/public/sample.pdf` PDF file in your browser.
-
----
 
 ## `PdfRenderer`
 
