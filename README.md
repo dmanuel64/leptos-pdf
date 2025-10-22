@@ -42,9 +42,9 @@ The main component, `PdfRenderer`, handles fetching, rendering, and optionally d
 
 ### Props
 
-| Prop        | Type                 | Description                                                                          |
-| ----------- | -------------------- | ------------------------------------------------------------------------------------ |
-| **`url`**   | `String`             | The source URL or path of the PDF to render.                                         |
-| **`page`**  | `MaybeSignal<usize>` | *(optional)* The current page number to display.                                     |
-| **`scale`** | `MaybeSignal<f32>`   | *(optional)* Scale factor for zooming in/out of the page.                            |
-| **`text`**  | `MaybeSignal<bool>`  | *(optional)* Enables a selectable text layer overlay using PDF.js's text extraction. |
+| **Prop**    | **Type**      | **Description**                                                                      |
+|-------------|---------------|--------------------------------------------------------------------------------------|
+| **`url`**   | `String`      | The source URL or path of the PDF to render.                                         |
+| **`page`**  | `MaybeSignal` | *(optional)* The current page number to display.                                     |
+| **`scale`** | `MaybeSignal` | *(optional)* Scale factor for zooming in/out of the page.                            |
+| **`text`**  | `MaybeSignal` | *(optional)* Enables a selectable text layer overlay using PDF.js's text extraction. |
