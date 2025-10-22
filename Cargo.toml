@@ -1,7 +1,7 @@
 [package]
 name = "leptos-pdf"
 description = "Leptos components for rendering and viewing PDFs in the browser."
-version = "0.1.0"
+version = "0.8.0"
 edition = "2024"
 keywords = ["leptos", "pdf", "webassembly", "wasm", "pdfjs"]
 categories = ["web-programming", "wasm", "rendering"]
