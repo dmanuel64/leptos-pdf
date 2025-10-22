@@ -81,7 +81,8 @@ pub fn PdfRenderer(
         let render_text_layer = text.get().unwrap_or(true);
         let render_annotation_layer = false;
         if let Some(resource) = pdf_handle.get() {
-            if let Some(handle) = resource {
+            if let Some(handle_ref) = &*resource {
+                let handle = handle_ref.clone();
                 spawn_local(async move {
                     if let Err(e) = handle
                         .render_page(
