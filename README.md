@@ -11,6 +11,7 @@ Add `leptos-pdf` to your project using the version that matches your Leptos vers
 | **Leptos Version** |        **Command**       |
 |:------------------:|:------------------------:|
 | 0.8                | `cargo add leptos-pdf@8` |
+| 0.7                | `cargo add leptos-pdf@7` |
 
 > Each `leptos-pdf` release tracks the same minor version of Leptos (e.g. `leptos-pdf` 0.8.x works with `leptos` 0.8.x).
 
