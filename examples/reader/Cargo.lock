@@ -801,7 +801,6 @@ dependencies = [
  "leptos",
  "leptos-pdf",
  "log",
- "wasm-bindgen",
 ]
 
 [[package]]

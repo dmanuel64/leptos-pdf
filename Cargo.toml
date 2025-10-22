@@ -7,6 +7,7 @@ keywords = ["leptos", "pdf", "webassembly", "wasm", "pdfjs"]
 categories = ["web-programming", "wasm", "rendering"]
 license = "MIT"
 authors = ["Dylan Manuel"]
+documentation = "https://docs.rs/leptos-pdf/latest/leptos_pdf/"
 repository = "https://github.com/dmanuel64/leptos-pdf"
 include = [
     "/src/**",
@@ -20,8 +21,8 @@ include = [
 
 
 [dependencies]
-leptos = "0.8.10"
-log = "0.4.28"
-uuid = { version = "1.18.1", features = ["v4", "js"] }
-wasm-bindgen = "0.2.104"
-wasm-bindgen-futures = "0.4.54"
+leptos = "0.8"
+log = "0.4"
+uuid = { version = "1", features = ["v4", "js"] }
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
