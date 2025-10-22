@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/dmanuel64/leptos-pdf/compare/v0.1.0...v0.8.0) (2025-10-22)
+
+
+### Miscellaneous Chores
+
+* release 0.8.0 ([688dfef](https://github.com/dmanuel64/leptos-pdf/commit/688dfef43392c5b1ca47c1b45ec5b52d0bc2701a))
+
 ## 0.1.0 (2025-10-22)
 
 
