@@ -12,10 +12,10 @@ extern "C" {
     ///
     /// # Arguments
     ///
-    /// * `page_num` - The 1-based page index to render.
-    /// * `scale`: The scale factor to render the page at.
-    /// * `text`: Whether to render the text layer on top of the canvas.
-    /// * `annotations`: Whether to render annotations on top of the text layer.
+    /// - `page_num` - The 1-based page index to render.
+    /// - `scale`: The scale factor to render the page at.
+    /// - `text`: Whether to render the text layer on top of the canvas.
+    /// - `annotations`: Whether to render annotations on top of the text layer.
     #[wasm_bindgen(js_name = renderPage, method, catch)]
     pub async fn render_page(
         this: &PdfHandle,
@@ -29,10 +29,10 @@ extern "C" {
     ///
     /// # Arguments
     ///
-    /// * `canvas_id`: The DOM element ID of the target `canvas` for rendering.
-    /// * `url`: The URL of the PDF document to load.
-    /// * `text_layer_id`: The DOM element ID of the container for selectable text content.
-    /// * `annotation_layer_id`: The DOM element ID ID of the container for annotations.
+    /// - `canvas_id`: The DOM element ID of the target `canvas` for rendering.
+    /// - `url`: The URL of the PDF document to load.
+    /// - `text_layer_id`: The DOM element ID of the container for selectable text content.
+    /// - `annotation_layer_id`: The DOM element ID ID of the container for annotations.
     #[wasm_bindgen(js_name = loadPdf, catch)]
     async fn load_pdf_no_cast(
         canvas_id: &str,
