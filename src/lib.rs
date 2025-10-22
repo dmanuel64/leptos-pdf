@@ -1,6 +1,10 @@
 //! # `leptos-pdf`
 //!
-//! `leptos-pdf` provides utilities for rendering PDFs as components in Leptos.
+//! `leptos-pdf` is a lightweight Leptos component library for rendering and viewing PDF files
+//! directly in your browser using [PDF.js](https://mozilla.github.io/pdf.js/).
+//!
+//! It provides an idiomatic Leptos interface for embedding PDFs in your Rust + WebAssembly
+//! applications - complete with canvas-based renderings, text selection, and reactive props for paging and scaling.
 //!
 //! ## Example
 //!
@@ -21,6 +25,9 @@
 //!     mount_to_body(App)
 //! }
 //! ```
+//! 
+//! See the [`PdfRenderer`] component for more information on PDF rendering.
+
 mod bindings;
 pub mod components;
 
