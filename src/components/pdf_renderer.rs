@@ -4,7 +4,7 @@
 //!
 //! ```rust
 //! use leptos::*;
-//! use your_library_name::PdfRenderer;
+//! use leptos_pdf::PdfRenderer;
 //!
 //! #[component]
 //! fn App() -> impl IntoView {
