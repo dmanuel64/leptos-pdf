@@ -3,7 +3,7 @@
 ![Leptos Support](https://img.shields.io/badge/Leptos%20Support-v0.7%20to%20v0.8-informational)
 [![docs.rs](https://img.shields.io/docsrs/leptos-pdf)](https://docs.rs/leptos-pdf)
 [![crates.io downloads](https://img.shields.io/crates/d/leptos-pdf.svg)](https://crates.io/crates/leptos-pdf)
-[![license](https://img.shields.io/crates/l/leptos-pdf.svg)](https://github.com/your-org/leptos-pdf/blob/main/LICENSE)  
+[![license](https://img.shields.io/crates/l/leptos-pdf.svg)](https://github.com/dmanuel64/leptos-pdf/blob/master/LICENSE)  
 ![Maintenance](https://img.shields.io/maintenance/yes/2025)
 
 # `leptos-pdf`
