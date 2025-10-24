@@ -6,7 +6,6 @@
 [![license](https://img.shields.io/crates/l/leptos-pdf.svg)](https://github.com/dmanuel64/leptos-pdf/blob/master/LICENSE)  
 ![Maintenance](https://img.shields.io/maintenance/yes/2025)
 
-
 # `leptos-pdf`
 
 `leptos-pdf` is a lightweight [Leptos](https://leptos.dev/) component library for rendering and viewing PDF files directly in your browser using [PDF.js](https://mozilla.github.io/pdf.js/).
