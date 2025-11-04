@@ -25,10 +25,9 @@
 //!     mount_to_body(App)
 //! }
 //! ```
-//! 
+//!
 //! See the [`PdfRenderer`] component for more information on PDF rendering.
 
-mod bindings;
 pub mod components;
 
 pub use components::PdfRenderer;
