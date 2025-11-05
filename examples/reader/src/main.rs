@@ -7,7 +7,7 @@ fn App() -> impl IntoView {
         <main>
             <div style:width="100vw" style:height="100vh">
                 <PdfiumProvider>
-                    <PdfDocument fallback=move || view! { <p>"Loading..."</p> } />
+                    <PdfDocument url="something" fallback=move || view! { <p>"Loading..."</p> } />
                 </PdfiumProvider>
             </div>
         </main>
