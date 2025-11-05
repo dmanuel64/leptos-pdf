@@ -1,12 +1,14 @@
 use leptos::prelude::*;
-use leptos_pdf::PdfRenderer;
+use leptos_pdf::components::{PdfDocument, PdfiumProvider};
 
 #[component]
 fn App() -> impl IntoView {
     view! {
         <main>
             <div style:width="100vw" style:height="100vh">
-            <PdfRenderer url="/public/sample.pdf"/>
+                <PdfiumProvider>
+                    <PdfDocument fallback=move || view! { <p>"Loading..."</p> } />
+                </PdfiumProvider>
             </div>
         </main>
     }

@@ -19,13 +19,14 @@ include = [
 ]
 
 
-
 [dependencies]
-image = "0.25.8"
+async-once-cell = "0.5"
+futures = "0.3"
+image = "0.25"
 leptos = "0.7"
 leptos_meta = "0.7"
 log = "0.4"
-pdfium-render = "0.8.35"
+pdfium-render = "0.8"
 uuid = { version = "1", features = ["v4", "js"] }
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
