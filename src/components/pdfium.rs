@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use async_once_cell::OnceCell;
 use futures::channel::oneshot;
 use leptos::{context::Provider, ev, prelude::*};
@@ -49,9 +51,9 @@ impl PdfiumInjection {
         use_context::<Self>()
     }
 
-    pub async fn create_pdfium(&self) -> Pdfium {
+    pub async fn create_pdfium(&self) -> Rc<RefCell<Pdfium>> {
         PDFIUM_INIT_CELL.get_or_init(init_pdfium()).await;
-        Pdfium::default()
+        Rc::new(RefCell::new(Pdfium::default()))
     }
 }
 #[component]

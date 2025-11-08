@@ -1,34 +1,77 @@
+use std::rc::Rc;
+
 use leptos::prelude::*;
 use pdfium_render::prelude::Pdfium;
-use wasm_bindgen_futures::js_sys;
-use web_sys::{Request, RequestInit, RequestMode};
+use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen_futures::{js_sys, JsFuture};
+use web_sys::{js_sys::Uint8Array, RequestMode, Response};
 
 use crate::components::pdfium::PdfiumInjection;
+
+async fn fetch_pdf_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
+    let window = web_sys::window().unwrap();
+
+    // Fetch the PDF
+    let resp_value = JsFuture::from(window.fetch_with_str(url)).await?;
+    let resp: Response = resp_value.dyn_into()?;
+
+    // Await the array buffer from the response
+    let abuf_promise = resp.array_buffer()?;
+    let abuf = JsFuture::from(abuf_promise).await?;
+
+    // Convert ArrayBuffer → Uint8Array → Vec<u8>
+    let u8_array = Uint8Array::new(&abuf);
+    let bytes = u8_array.to_vec();
+    Ok(bytes)
+}
 
 #[component]
 pub fn PdfDocument(
     #[prop(into)] url: Signal<String>,
     #[prop(optional, into)] password: MaybeProp<String>,
-    #[prop(optional, into)] fallback: ViewFnOnce,
+    #[prop(optional, into)] loading_fallback: ViewFnOnce,
+    #[prop(optional, into)] error_fallback: ViewFn,
+    #[prop(default=RequestMode::SameOrigin)] mode: RequestMode,
 ) -> impl IntoView {
     let pdfium = LocalResource::new(move || {
-        let injection = PdfiumInjection::use_context().expect("PdfiumProvider is missing");
+        let injection = PdfiumInjection::use_context()
+            .expect("PdfDocument must be used within a PdfiumProvider component");
         async move { injection.create_pdfium().await }
     });
-    let opts = RequestInit::new();
-    opts.set_method("GET");
-    opts.set_mode(RequestMode::Cors);
+    let pdf_data = LocalResource::new(move || async move {
+        fetch_pdf_bytes(&url.get())
+            .await
+            .inspect_err(|err| log::error!("Failed to fetch PDF {}: {:?}", url.get(), err))
+            .ok()
+    });
     view! {
-        <Transition fallback>
-            {move || { pdfium.with(|maybe_pdfium| {
-                if let Some(p) = maybe_pdfium {
-                    // let request = Request::new_with_str_and_init(&url, &opts)?;
-                    log::warn!("{:?}", p.load_pdf_from_byte_slice(&[1], password.get().as_deref()));
-                    true
+        
+        <Transition fallback=loading_fallback>
+            {move || {
+                if let Some(pdfium) = pdfium.get() {
+                    let pdfium_ref = pdfium.borrow();
+                    if let Some(pdf_data_result) = pdf_data.get() {
+                        if let Some(pdf_data) = pdf_data_result.take() {
+                            let view = match pdfium_ref
+                                .load_pdf_from_byte_vec(pdf_data, password.get().as_deref())
+                            {
+                                Ok(pdf) => Some(view! { <p>"The PDF"</p> }.into_any()),
+                                Err(err) => {
+                                    log::error!("Failed to load PDF {}: {:?}", url.get(), err);
+                                    Some(error_fallback.run().into_any())
+                                }
+                            };
+                            Some(view)
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
                 } else {
-                    false
+                    None
                 }
-            }).then(|| view! { <p>"Loaded PDF"</p> }) }}
+            }}
         </Transition>
     }
 }
