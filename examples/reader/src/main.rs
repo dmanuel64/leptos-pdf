@@ -6,7 +6,7 @@ fn App() -> impl IntoView {
     view! {
         <main>
             <div style:width="100vw" style:height="100vh">
-                <PdfiumProvider>
+                <PdfiumProvider src="/public/pdfium/pdfium.js">
                     <PdfDocument
                         url="/public/sample.pdf"
                         loading_fallback=move || view! { <p>"Loading..."</p> }

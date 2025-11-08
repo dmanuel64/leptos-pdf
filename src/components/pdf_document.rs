@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use leptos::prelude::*;
+use leptos::{html::Canvas, prelude::*};
 use pdfium_render::prelude::Pdfium;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::{js_sys, JsFuture};
@@ -44,8 +44,8 @@ pub fn PdfDocument(
             .inspect_err(|err| log::error!("Failed to fetch PDF {}: {:?}", url.get(), err))
             .ok()
     });
+    let canvas_ref = NodeRef::<Canvas>::new();
     view! {
-        
         <Transition fallback=loading_fallback>
             {move || {
                 if let Some(pdfium) = pdfium.get() {
@@ -55,7 +55,21 @@ pub fn PdfDocument(
                             let view = match pdfium_ref
                                 .load_pdf_from_byte_vec(pdf_data, password.get().as_deref())
                             {
-                                Ok(pdf) => Some(view! { <p>"The PDF"</p> }.into_any()),
+                                Ok(pdf) => {
+                                    for page in pdf.pages().iter() {
+                                        page.render(2000, 2000, None).unwrap().as_image().as_bytes();
+                                        // canvas_ref.get().unwrap().get_context("2d");
+                                        log::warn!("Rendered");
+                                    }
+                                    Some(
+                                        view! {
+                                            <canvas node_ref=canvas_ref>
+                                                <p>{"The PDF"}</p>
+                                            </canvas>
+                                        }
+                                            .into_any(),
+                                    )
+                                }
                                 Err(err) => {
                                     log::error!("Failed to load PDF {}: {:?}", url.get(), err);
                                     Some(error_fallback.run().into_any())

@@ -1,12 +1,13 @@
 use std::{cell::RefCell, rc::Rc};
 
-use async_once_cell::OnceCell;
+use async_once_cell::OnceCell as AsyncOnceCell;
 use futures::channel::oneshot;
 use leptos::{context::Provider, ev, prelude::*};
+use leptos_meta::Script;
 use pdfium_render::prelude::Pdfium;
 use wasm_bindgen::{prelude::Closure, JsCast};
 
-static PDFIUM_INIT_CELL: OnceCell<()> = OnceCell::new();
+static PDFIUM_INIT_CELL: AsyncOnceCell<()> = AsyncOnceCell::new();
 
 async fn init_pdfium() {
     // This is the one-time, lazy-executed async block.
@@ -56,7 +57,12 @@ impl PdfiumInjection {
         Rc::new(RefCell::new(Pdfium::default()))
     }
 }
+
 #[component]
-pub fn PdfiumProvider(children: Children) -> impl IntoView {
-    view! { <Provider value=PdfiumInjection>{children()}</Provider> }
+pub fn PdfiumProvider(#[prop(into)] src: String, children: Children) -> impl IntoView {
+    view! {
+        <Script src/>
+        <Script type_="module">{include_str!("../../javascript/init_pdfium.js")}</Script>
+        <Provider value=PdfiumInjection>{children()}</Provider>
+    }
 }
