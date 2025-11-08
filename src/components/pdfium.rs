@@ -6,6 +6,7 @@ use leptos::{context::Provider, ev, prelude::*};
 use leptos_meta::Script;
 use pdfium_render::prelude::Pdfium;
 use wasm_bindgen::{prelude::Closure, JsCast};
+use web_sys::js_sys;
 
 static PDFIUM_INIT_CELL: AsyncOnceCell<()> = AsyncOnceCell::new();
 
@@ -61,8 +62,12 @@ impl PdfiumInjection {
 #[component]
 pub fn PdfiumProvider(#[prop(into)] src: String, children: Children) -> impl IntoView {
     view! {
-        <Script src/>
-        <Script type_="module">{include_str!("../../javascript/init_pdfium.js")}</Script>
+        <Script
+            src
+            on:load=move |_| {
+                let _ = js_sys::eval(include_str!("../../javascript/init_pdfium.js"));
+            }
+        />
         <Provider value=PdfiumInjection>{children()}</Provider>
     }
 }
