@@ -49,10 +49,9 @@ pub fn PdfDocument(
         <Transition fallback=loading_fallback>
             {move || {
                 if let Some(pdfium) = pdfium.get() {
-                    let pdfium_ref = pdfium.borrow();
                     if let Some(pdf_data_result) = pdf_data.get() {
                         if let Some(pdf_data) = pdf_data_result.take() {
-                            let view = match pdfium_ref
+                            let view = match pdfium
                                 .load_pdf_from_byte_vec(pdf_data, password.get().as_deref())
                             {
                                 Ok(pdf) => {

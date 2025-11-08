@@ -53,9 +53,9 @@ impl PdfiumInjection {
         use_context::<Self>()
     }
 
-    pub async fn create_pdfium(&self) -> Rc<RefCell<Pdfium>> {
+    pub async fn create_pdfium(&self) -> Rc<Pdfium> {
         PDFIUM_INIT_CELL.get_or_init(init_pdfium()).await;
-        Rc::new(RefCell::new(Pdfium::default()))
+        Rc::new(Pdfium::default())
     }
 }
 
