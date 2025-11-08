@@ -61,7 +61,7 @@ pub fn PdfDocument(
                                     Some(error_fallback.run().into_any())
                                 }
                             };
-                            Some(view)
+                            view
                         } else {
                             None
                         }
