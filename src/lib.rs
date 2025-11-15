@@ -30,3 +30,5 @@
 
 pub mod components;
 pub use components::PdfRenderer;
+pub use components::PdfDocument;
+pub use components::PdfiumProvider;

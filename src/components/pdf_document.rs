@@ -1,12 +1,15 @@
 use std::rc::Rc;
 
 use leptos::{html::Canvas, prelude::*};
-use pdfium_render::prelude::Pdfium;
+use pdfium_render::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::{js_sys, JsFuture};
 use web_sys::{js_sys::Uint8Array, RequestMode, Response};
 
-use crate::components::pdfium::PdfiumInjection;
+use crate::components::{
+    pdf_page::{PdfPage, TextWord},
+    pdfium::PdfiumInjection,
+};
 
 async fn fetch_pdf_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
     let window = web_sys::window().unwrap();
@@ -25,6 +28,9 @@ async fn fetch_pdf_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
     Ok(bytes)
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct TextLayerConfig {}
+
 #[component]
 pub fn PdfDocument(
     #[prop(into)] url: Signal<String>,
@@ -32,6 +38,7 @@ pub fn PdfDocument(
     #[prop(optional, into)] loading_fallback: ViewFnOnce,
     #[prop(optional, into)] error_fallback: ViewFn,
     #[prop(default=RequestMode::SameOrigin)] mode: RequestMode,
+    #[prop(optional)] text_layer_config: Option<TextLayerConfig>,
 ) -> impl IntoView {
     let pdfium = LocalResource::new(move || {
         let injection = PdfiumInjection::use_context()
@@ -45,6 +52,7 @@ pub fn PdfDocument(
             .ok()
     });
     let canvas_ref = NodeRef::<Canvas>::new();
+
     view! {
         <Transition fallback=loading_fallback>
             {move || {
@@ -55,17 +63,36 @@ pub fn PdfDocument(
                                 .load_pdf_from_byte_vec(pdf_data, password.get().as_deref())
                             {
                                 Ok(pdf) => {
-                                    for page in pdf.pages().iter() {
-                                        page.render(2000, 2000, None).unwrap().as_image().as_bytes();
-                                        // canvas_ref.get().unwrap().get_context("2d");
-                                        log::warn!("Rendered");
-                                    }
                                     Some(
-                                        view! {
-                                            <canvas node_ref=canvas_ref>
-                                                <p>{"The PDF"}</p>
-                                            </canvas>
-                                        }
+                                        pdf
+                                            .pages()
+                                            .iter()
+                                            .enumerate()
+                                            .map(|(idx, page)| {
+                                                let page_num = idx + 1;
+                                                if let Some(_text_config) = text_layer_config {
+                                                    let words = page
+                                                        .text()
+                                                        .map(|text| {
+                                                            let segments = text.segments();
+                                                            let words: Vec<TextWord> = segments
+                                                                .iter()
+                                                                .map(|segment| TextWord::from(segment))
+                                                                .collect();
+                                                            words
+                                                        })
+                                                        .inspect_err(|e| {
+                                                            log::error!(
+                                                                "Failed to extract PDF text from page {page_num}: {}", e
+                                                            )
+                                                        })
+                                                        .unwrap_or_default();
+                                                    view! { <PdfPage words /> }
+                                                } else {
+                                                    view! { <PdfPage /> }
+                                                }
+                                            })
+                                            .collect_view()
                                             .into_any(),
                                     )
                                 }
