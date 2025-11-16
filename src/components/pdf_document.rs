@@ -7,10 +7,7 @@ use wasm_bindgen_futures::{js_sys, JsFuture};
 use web_sys::{js_sys::Uint8Array, RequestMode, Response};
 
 use crate::{
-    components::{
-        pdf_page::{PageWord, PdfPage},
-        pdfium::PdfiumInjection,
-    },
+    components::{pdf_page::PageWord, pdfium::PdfiumInjection, PdfPage},
     errors::{self, PdfError},
 };
 
@@ -74,7 +71,12 @@ where
                             } else {
                                 vec![]
                             };
-                            views.push(view! { <PdfPage words /> }.into_any());
+                            let rendered_page = page
+                                .render_with_config(&PdfRenderConfig::new())
+                                .map_err(|e| PdfError::RenderError(format!("{}", e)))?
+                                .as_image_data()
+                                .map_err(|e| PdfError::RenderError(format!("{:?}", e)))?;
+                            views.push(view! { <PdfPage rendered_page words /> }.into_any());
                         }
                         Ok(views)
                     })}
