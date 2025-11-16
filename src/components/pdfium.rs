@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{rc::Rc, sync::Arc};
 
 use async_once_cell::OnceCell as AsyncOnceCell;
 use futures::channel::oneshot;
@@ -53,9 +53,9 @@ impl PdfiumInjection {
         use_context::<Self>()
     }
 
-    pub async fn create_pdfium(&self) -> Rc<Pdfium> {
+    pub async fn create_pdfium(&self) -> Arc<Pdfium> {
         PDFIUM_INIT_CELL.get_or_init(init_pdfium()).await;
-        Rc::new(Pdfium::default())
+        Arc::new(Pdfium::default())
     }
 }
 

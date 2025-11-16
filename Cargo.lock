@@ -1136,6 +1136,7 @@ dependencies = [
  "leptos_meta",
  "log",
  "pdfium-render",
+ "thiserror 2.0.17",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",

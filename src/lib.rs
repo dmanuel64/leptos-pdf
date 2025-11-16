@@ -29,6 +29,7 @@
 //! See the [`PdfRenderer`] component for more information on PDF rendering.
 
 pub mod components;
-pub use components::PdfRenderer;
 pub use components::PdfDocument;
+pub use components::PdfRenderer;
 pub use components::PdfiumProvider;
+pub mod errors;

@@ -27,6 +27,7 @@ leptos = "0.7"
 leptos_meta = "0.7"
 log = "0.4"
 pdfium-render = { version = "0.8", features = ["sync"] }
+thiserror = "2.0.17"
 uuid = { version = "1", features = ["v4", "js"] }
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"

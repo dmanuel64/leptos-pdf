@@ -1,20 +1,12 @@
-use leptos::prelude::*;
-use pdfium_render::prelude::{PdfPageTextSegment, PdfPoints, PdfRect};
+use leptos::{html::Canvas, prelude::*};
+use pdfium_render::prelude::{PdfPageTextSegment, PdfRect};
 
-struct TextParagraph {
-    lines: Vec<TextLine>,
-}
-
-struct TextLine {
-    words: Vec<TextWord>,
-}
-
-pub struct TextWord {
+pub struct PageWord {
     text: String,
     bounds: PdfRect,
 }
 
-impl From<PdfPageTextSegment<'_>> for TextWord {
+impl From<PdfPageTextSegment<'_>> for PageWord {
     fn from(value: PdfPageTextSegment) -> Self {
         Self {
             text: value.text(),
@@ -24,6 +16,11 @@ impl From<PdfPageTextSegment<'_>> for TextWord {
 }
 
 #[component]
-pub fn PdfPage(#[prop(optional)] words: Vec<TextWord>) -> impl IntoView {
-    view! { <div>"PDF Page Component"</div> }
+pub fn PdfPage(#[prop(optional)] words: Vec<PageWord>) -> impl IntoView {
+    let canvas_ref = NodeRef::<Canvas>::new();
+    view! {
+        <div class="leptos-pdf-page">
+            <canvas class="leptos-pdf-page-canvas" node_ref=canvas_ref />
+        </div>
+    }
 }

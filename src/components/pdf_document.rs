@@ -1,14 +1,17 @@
 use std::rc::Rc;
 
-use leptos::{html::Canvas, prelude::*};
+use leptos::prelude::*;
 use pdfium_render::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::{js_sys, JsFuture};
 use web_sys::{js_sys::Uint8Array, RequestMode, Response};
 
-use crate::components::{
-    pdf_page::{PdfPage, TextWord},
-    pdfium::PdfiumInjection,
+use crate::{
+    components::{
+        pdf_page::{PageWord, PdfPage},
+        pdfium::PdfiumInjection,
+    },
+    errors::{self, PdfError},
 };
 
 async fn fetch_pdf_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
@@ -32,86 +35,51 @@ async fn fetch_pdf_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
 pub struct TextLayerConfig {}
 
 #[component]
-pub fn PdfDocument(
+pub fn PdfDocument<FalFn, Fal>(
     #[prop(into)] url: Signal<String>,
     #[prop(optional, into)] password: MaybeProp<String>,
     #[prop(optional, into)] loading_fallback: ViewFnOnce,
-    #[prop(optional, into)] error_fallback: ViewFn,
+    error_fallback: FalFn,
     #[prop(default=RequestMode::SameOrigin)] mode: RequestMode,
-    #[prop(optional)] text_layer_config: Option<TextLayerConfig>,
-) -> impl IntoView {
+    #[prop(optional, into)] text_layer_config: MaybeProp<TextLayerConfig>,
+) -> impl IntoView
+where
+    FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + 'static,
+    Fal: IntoView + Send + 'static,
+{
     let pdfium = LocalResource::new(move || {
         let injection = PdfiumInjection::use_context()
             .expect("PdfDocument must be used within a PdfiumProvider component");
         async move { injection.create_pdfium().await }
     });
-    let pdf_data = LocalResource::new(move || async move {
-        fetch_pdf_bytes(&url.get())
-            .await
-            .inspect_err(|err| log::error!("Failed to fetch PDF {}: {:?}", url.get(), err))
-            .ok()
-    });
-    let canvas_ref = NodeRef::<Canvas>::new();
-
+    let pdf_data = LocalResource::new(move || async move { fetch_pdf_bytes(&url.get()).await });
     view! {
-        <Transition fallback=loading_fallback>
-            {move || {
-                if let Some(pdfium) = pdfium.get() {
-                    if let Some(pdf_data_result) = pdf_data.get() {
-                        if let Some(pdf_data) = pdf_data_result.take() {
-                            let view = match pdfium
-                                .load_pdf_from_byte_vec(pdf_data, password.get().as_deref())
+        <div class="leptos-pdf-document">
+            <ErrorBoundary fallback=error_fallback>
+                <Transition fallback=loading_fallback>
+                    {move || Suspend::<
+                        Result<Vec<AnyView>, PdfError>,
+                    >::new(async move {
+                        let pdfium = pdfium.await;
+                        let pdf_data = pdf_data.await;
+                        let pdf = pdfium
+                            .load_pdf_from_byte_vec(pdf_data.unwrap(), password.get().as_deref())
+                            .map_err(|e| PdfError::LoadingError(format!("{}", e)))?;
+                        let mut views: Vec<AnyView> = Vec::new();
+                        for page in pdf.pages().iter() {
+                            let words: Vec<PageWord> = if let Some(text_layer_config) = text_layer_config
+                                .get()
                             {
-                                Ok(pdf) => {
-                                    Some(
-                                        pdf
-                                            .pages()
-                                            .iter()
-                                            .enumerate()
-                                            .map(|(idx, page)| {
-                                                let page_num = idx + 1;
-                                                if let Some(_text_config) = text_layer_config {
-                                                    let words = page
-                                                        .text()
-                                                        .map(|text| {
-                                                            let segments = text.segments();
-                                                            let words: Vec<TextWord> = segments
-                                                                .iter()
-                                                                .map(|segment| TextWord::from(segment))
-                                                                .collect();
-                                                            words
-                                                        })
-                                                        .inspect_err(|e| {
-                                                            log::error!(
-                                                                "Failed to extract PDF text from page {page_num}: {}", e
-                                                            )
-                                                        })
-                                                        .unwrap_or_default();
-                                                    view! { <PdfPage words /> }
-                                                } else {
-                                                    view! { <PdfPage /> }
-                                                }
-                                            })
-                                            .collect_view()
-                                            .into_any(),
-                                    )
-                                }
-                                Err(err) => {
-                                    log::error!("Failed to load PDF {}: {:?}", url.get(), err);
-                                    Some(error_fallback.run().into_any())
-                                }
+                                vec![]
+                            } else {
+                                vec![]
                             };
-                            view
-                        } else {
-                            None
+                            views.push(view! { <PdfPage words /> }.into_any());
                         }
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
-            }}
-        </Transition>
+                        Ok(views)
+                    })}
+                </Transition>
+            </ErrorBoundary>
+        </div>
     }
 }
