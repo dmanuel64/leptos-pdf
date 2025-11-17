@@ -1,18 +1,16 @@
-use std::rc::Rc;
-
 use leptos::prelude::*;
 use pdfium_render::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
-use wasm_bindgen_futures::{js_sys, JsFuture};
+use wasm_bindgen_futures::JsFuture;
 use web_sys::{js_sys::Uint8Array, RequestMode, Response};
 
 use crate::{
     components::{pdf_page::PageWord, pdfium::PdfiumInjection, PdfPage},
-    errors::{self, PdfError},
+    errors::PdfError,
 };
 
 async fn fetch_pdf_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
-    let window = web_sys::window().unwrap();
+    let window = window();
 
     // Fetch the PDF
     let resp_value = JsFuture::from(window.fetch_with_str(url)).await?;
@@ -39,6 +37,7 @@ pub fn PdfDocument<FalFn, Fal>(
     error_fallback: FalFn,
     #[prop(default=RequestMode::SameOrigin)] mode: RequestMode,
     #[prop(optional, into)] text_layer_config: MaybeProp<TextLayerConfig>,
+    #[prop(into, default=1f32.into())] scale: Signal<f32>,
 ) -> impl IntoView
 where
     FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + 'static,
@@ -72,7 +71,9 @@ where
                                 vec![]
                             };
                             let rendered_page = page
-                                .render_with_config(&PdfRenderConfig::new())
+                                .render_with_config(
+                                    &PdfRenderConfig::new().scale_page_by_factor(scale.get()),
+                                )
                                 .map_err(|e| PdfError::RenderError(format!("{}", e)))?
                                 .as_image_data()
                                 .map_err(|e| PdfError::RenderError(format!("{:?}", e)))?;
