@@ -1,9 +1,9 @@
-use std::{rc::Rc, sync::Arc};
+use std::sync::Arc;
 
 use async_once_cell::OnceCell as AsyncOnceCell;
 use futures::channel::oneshot;
 use leptos::{context::Provider, ev, prelude::*};
-use leptos_meta::Script;
+use leptos_meta::{Script, Style};
 use pdfium_render::prelude::Pdfium;
 use wasm_bindgen::{prelude::Closure, JsCast};
 use web_sys::js_sys;
@@ -68,6 +68,7 @@ pub fn PdfiumProvider(#[prop(into)] src: String, children: Children) -> impl Int
                 let _ = js_sys::eval(include_str!("../../javascript/init_pdfium.js"));
             }
         />
+        <Style>{include_str!("../../style.css")}</Style>
         <Provider value=PdfiumInjection>{children()}</Provider>
     }
 }

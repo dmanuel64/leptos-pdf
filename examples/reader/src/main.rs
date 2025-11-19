@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use leptos_pdf::components::{PdfDocument, PdfiumProvider};
+use leptos_pdf::components::{PdfDocument, PdfiumProvider, TextLayerConfig};
 
 #[component]
 fn App() -> impl IntoView {
@@ -11,6 +11,7 @@ fn App() -> impl IntoView {
                         url="/public/sample.pdf"
                         loading_fallback=move || view! { <p>"Loading..."</p> }
                         error_fallback=move |_| view! { <p>"An error occurred..."</p> }
+                        text_layer_config=TextLayerConfig::default()
                     />
                 </PdfiumProvider>
             </div>

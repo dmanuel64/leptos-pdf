@@ -2,18 +2,20 @@ use leptos::prelude::*;
 use pdfium_render::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{js_sys::Uint8Array, RequestMode, Response};
+use web_sys::{js_sys::Uint8Array, RequestInit, RequestMode, Response};
 
 use crate::{
-    components::{pdf_page::PageWord, pdfium::PdfiumInjection, PdfPage},
+    components::{pdf_page::PdfText, pdfium::PdfiumInjection, PdfPage},
     errors::PdfError,
 };
 
-async fn fetch_pdf_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
+async fn fetch_pdf_bytes(url: &str, mode: RequestMode) -> Result<Vec<u8>, JsValue> {
     let window = window();
 
     // Fetch the PDF
-    let resp_value = JsFuture::from(window.fetch_with_str(url)).await?;
+    let request_init = RequestInit::new();
+    request_init.set_mode(mode);
+    let resp_value = JsFuture::from(window.fetch_with_str_and_init(url, &request_init)).await?;
     let resp: Response = resp_value.dyn_into()?;
 
     // Await the array buffer from the response
@@ -27,17 +29,78 @@ async fn fetch_pdf_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct TextLayerConfig {}
+pub struct TextLayerConfig {
+    preserve_text_formatting: bool,
+    collect_words: bool,
+    use_precise_char_bounds: bool,
+    use_precise_font_size: bool,
+}
+
+impl Default for TextLayerConfig {
+    fn default() -> Self {
+        Self {
+            preserve_text_formatting: true,
+            collect_words: true,
+            use_precise_char_bounds: false,
+            use_precise_font_size: true,
+        }
+    }
+}
+// TODO: adjust font size for scale
+fn create_text_fragments(config: &TextLayerConfig, text: &PdfPageText) -> Vec<PdfText> {
+    let words: Vec<PdfText> = text
+        .chars()
+        .iter()
+        .filter_map(|c| {
+            c.unicode_string().map(|s| PdfText {
+                text: s.clone(),
+                font_family: c
+                    .text_object()
+                    .map(|t| t.font().family())
+                    .unwrap_or_default(),
+                font_size: format!(
+                    "{}pt",
+                    (if config.use_precise_font_size {
+                        c.scaled_font_size()
+                    } else {
+                        c.unscaled_font_size()
+                    })
+                    .value
+                ),
+                bounds: (if config.use_precise_char_bounds {
+                    c.tight_bounds()
+                } else {
+                    c.loose_bounds()
+                })
+                .expect("bounds should be accessible"),
+            })
+        })
+        .collect();
+    words
+}
 
 #[component]
 pub fn PdfDocument<FalFn, Fal>(
-    #[prop(into)] url: Signal<String>,
-    #[prop(optional, into)] password: MaybeProp<String>,
-    #[prop(optional, into)] loading_fallback: ViewFnOnce,
+    /// URL to the PDF file
+    #[prop(into)]
+    url: Signal<String>,
+    /// Password to access the PDF if required
+    #[prop(optional, into)]
+    password: MaybeProp<String>,
+    /// View to display while the PDF is loading
+    #[prop(optional, into)]
+    loading_fallback: ViewFnOnce,
+    /// View to display if an error is encountered and the PDF cannot be loaded
     error_fallback: FalFn,
-    #[prop(default=RequestMode::SameOrigin)] mode: RequestMode,
-    #[prop(optional, into)] text_layer_config: MaybeProp<TextLayerConfig>,
+    /// Options for fetching the PDF file
+    #[prop(default=RequestMode::SameOrigin)]
+    mode: RequestMode,
+    /// Configuration options for the selectable text layer. Not providing a value will not render a text layer
+    #[prop(optional, into)]
+    text_layer_config: MaybeProp<TextLayerConfig>,
+    #[prop(optional, into)] set_captured_document_text: Option<WriteSignal<Vec<String>>>,
     #[prop(into, default=1f32.into())] scale: Signal<f32>,
+    #[prop(into, default="20px".into())] page_gap: Signal<String>,
 ) -> impl IntoView
 where
     FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + 'static,
@@ -48,7 +111,8 @@ where
             .expect("PdfDocument must be used within a PdfiumProvider component");
         async move { injection.create_pdfium().await }
     });
-    let pdf_data = LocalResource::new(move || async move { fetch_pdf_bytes(&url.get()).await });
+    let pdf_data =
+        LocalResource::new(move || async move { fetch_pdf_bytes(&url.get(), mode).await });
     view! {
         <div class="leptos-pdf-document">
             <ErrorBoundary fallback=error_fallback>
@@ -62,14 +126,24 @@ where
                             .load_pdf_from_byte_vec(pdf_data.unwrap(), password.get().as_deref())
                             .map_err(|e| PdfError::LoadingError(format!("{}", e)))?;
                         let mut views: Vec<AnyView> = Vec::new();
+                        let mut captured_document_text: Vec<String> = Vec::new();
                         for page in pdf.pages().iter() {
-                            let words: Vec<PageWord> = if let Some(text_layer_config) = text_layer_config
+                            let text_fragments: Vec<PdfText> = if let Some(text_layer_config) = text_layer_config
                                 .get()
                             {
-                                vec![]
+                                create_text_fragments(
+                                    &text_layer_config,
+                                    &page.text().expect("page text should be extractable"),
+                                )
                             } else {
                                 vec![]
                             };
+                            if set_captured_document_text.is_some() {
+                                captured_document_text
+                                    .push(
+                                        page.text().expect("page text should be extractable").all(),
+                                    );
+                            }
                             let rendered_page = page
                                 .render_with_config(
                                     &PdfRenderConfig::new().scale_page_by_factor(scale.get()),
@@ -77,7 +151,18 @@ where
                                 .map_err(|e| PdfError::RenderError(format!("{}", e)))?
                                 .as_image_data()
                                 .map_err(|e| PdfError::RenderError(format!("{:?}", e)))?;
-                            views.push(view! { <PdfPage rendered_page words /> }.into_any());
+                            views
+                                .push(
+                                    // asdf
+                                    // render
+                                    view! {
+                                        <PdfPage rendered_page text_fragments=text_fragments />
+                                    }
+                                        .into_any(),
+                                );
+                        }
+                        if let Some(set_captured_document_text) = set_captured_document_text {
+                            set_captured_document_text.set(captured_document_text);
                         }
                         Ok(views)
                     })}

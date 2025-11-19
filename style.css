@@ -1,0 +1,19 @@
+.leptos-pdf-document {
+    position: relative;
+}
+
+.leptos-pdf-text-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.leptos-pdf-text-fragment {
+    position: absolute;
+    color: transparent;
+}
+
+.leptos-pdf-text-layer ::selection {
+    color: transparent;
+    background-color: #3368d16e;
+}
