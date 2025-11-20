@@ -47,32 +47,42 @@ impl Default for TextLayerConfig {
     }
 }
 // TODO: adjust font size for scale
-fn create_text_fragments(config: &TextLayerConfig, text: &PdfPageText) -> Vec<PdfText> {
+fn create_text_fragments(config: &TextLayerConfig, text: &PdfPageText, scale: f32) -> Vec<PdfText> {
     let words: Vec<PdfText> = text
         .chars()
         .iter()
         .filter_map(|c| {
-            c.unicode_string().map(|s| PdfText {
-                text: s.clone(),
-                font_family: c
-                    .text_object()
-                    .map(|t| t.font().family())
-                    .unwrap_or_default(),
-                font_size: format!(
-                    "{}pt",
-                    (if config.use_precise_font_size {
-                        c.scaled_font_size()
-                    } else {
-                        c.unscaled_font_size()
-                    })
-                    .value
-                ),
-                bounds: (if config.use_precise_char_bounds {
+            c.unicode_string().map(|s| {
+                let bounds = if config.use_precise_char_bounds {
                     c.tight_bounds()
                 } else {
                     c.loose_bounds()
-                })
-                .expect("bounds should be accessible"),
+                }
+                .expect("bounds should be accessible");
+                let bounds = PdfRect::new_from_values(
+                    bounds.bottom().value * scale,
+                    bounds.left().value * scale,
+                    bounds.top().value * scale,
+                    bounds.right().value * scale,
+                );
+                PdfText {
+                    text: s.clone(),
+                    font_family: c
+                        .text_object()
+                        .map(|t| t.font().family())
+                        .unwrap_or_default(),
+                    font_size: format!(
+                        "{}pt",
+                        (if config.use_precise_font_size {
+                            c.scaled_font_size()
+                        } else {
+                            c.unscaled_font_size()
+                        })
+                        .value
+                            * scale
+                    ),
+                    bounds: bounds,
+                }
             })
         })
         .collect();
@@ -134,6 +144,7 @@ where
                                 create_text_fragments(
                                     &text_layer_config,
                                     &page.text().expect("page text should be extractable"),
+                                    scale.get(),
                                 )
                             } else {
                                 vec![]
