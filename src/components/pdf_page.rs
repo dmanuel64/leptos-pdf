@@ -1,6 +1,6 @@
 use leptos::{html::Canvas, prelude::*};
 use pdfium_render::prelude::PdfRect;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{Clamped, JsCast};
 use web_sys::{CanvasRenderingContext2d, ImageData};
 
 // TODO: this would probably make more sense as a slot
@@ -18,13 +18,14 @@ pub struct PdfText {
 // TODO: text_fragments should probably not be a signal if most other props in this component are not reactive
 #[component]
 pub fn PdfPage(
-    rendered_page: ImageData,
-    #[prop(optional, into)] text_fragments: Signal<Vec<PdfText>>,
+    pixels: Vec<u8>,
+    width: u32,
+    height: u32,
+    text_fragments: Vec<PdfText>,
 ) -> impl IntoView {
     let canvas_ref = NodeRef::<Canvas>::new();
-    let canvas_width = format!("{}px", rendered_page.width());
-    let canvas_height = format!("{}px", rendered_page.height());
-    let text_layer_width = canvas_width.clone();
+    let canvas_width = format!("{width}px");
+    let canvas_height = format!("{height}px");
     let text_layer_height = canvas_height.clone();
     Effect::new(move |_| {
         if let Some(canvas_ref) = canvas_ref.get() {
@@ -34,21 +35,27 @@ pub fn PdfPage(
                 .expect("there should be a 2d context attached to the canvas")
                 .dyn_into::<CanvasRenderingContext2d>()
                 .expect("the 2d context should be of type CanvasRenderingContext2d");
+            // log::warn!("{:?}", rendered_page.data());
+            let rendered_page = ImageData::new_with_u8_clamped_array_and_sh(
+                Clamped(&pixels),
+                width,
+                height,
+            )
+            .expect("ImageData to be created without any errors");
             ctx.put_image_data(&rendered_page, 0f64, 0f64)
                 .expect("put_image_data should not raise NotSupportedError or InvalidStateError");
         }
     });
+    let no_text = text_fragments.is_empty();
     view! {
         <div class="leptos-pdf-page" style:position="relative">
-            <Show when=move || !text_fragments.get().is_empty()>
+            <Show when=move || !no_text>
                 <div class="leptos-pdf-text-layer">
                     {text_fragments
-                        .get()
                         .iter()
                         .map(|t| {
                             let left = format!("{}px", t.bounds.left().value);
                             let top = format!("{}px", t.bounds.top().value);
-                            log::warn!("{:?}", t.bounds);
                             view! {
                                 <span
                                     class="leptos-pdf-text-fragment"

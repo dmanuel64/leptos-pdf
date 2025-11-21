@@ -2,10 +2,10 @@ use leptos::prelude::*;
 use pdfium_render::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{js_sys::Uint8Array, RequestInit, RequestMode, Response};
+use web_sys::{RequestInit, RequestMode, Response, js_sys::Uint8Array};
 
 use crate::{
-    components::{pdf_page::PdfText, pdfium::PdfiumInjection, PdfPage},
+    components::{PdfPage, pdf_page::PdfText, pdfium::PdfiumInjection},
     errors::PdfError,
 };
 
@@ -159,15 +159,18 @@ where
                                 .render_with_config(
                                     &PdfRenderConfig::new().scale_page_by_factor(scale.get()),
                                 )
-                                .map_err(|e| PdfError::RenderError(format!("{}", e)))?
-                                .as_image_data()
-                                .map_err(|e| PdfError::RenderError(format!("{:?}", e)))?;
+                                .map_err(|e| PdfError::RenderError(format!("{}", e)))?;
+                            // Workaround by creating an ImageData in Rust
+                            // Issue: https://github.com/wasm-bindgen/wasm-bindgen/issues/4815
+                            let pixels: Vec<_> = rendered_page.as_rgba_bytes().to_vec();
+                            let width = rendered_page.width() as u32;
+                            let height = rendered_page.height() as u32;
                             views
                                 .push(
                                     // asdf
                                     // render
                                     view! {
-                                        <PdfPage rendered_page text_fragments=text_fragments />
+                                        <PdfPage pixels width height text_fragments=text_fragments />
                                     }
                                         .into_any(),
                                 );
