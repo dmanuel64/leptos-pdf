@@ -28,7 +28,7 @@ async fn fetch_pdf_bytes(url: &str, mode: RequestMode) -> Result<Vec<u8>, JsValu
     Ok(bytes)
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct TextLayerConfig {
     preserve_text_formatting: bool,
     collect_words: bool,
@@ -46,6 +46,15 @@ impl Default for TextLayerConfig {
         }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct LayoutConfig {
+    pub background: Option<String>,
+    pub gap: Option<String>,
+    pub padding: Option<String>,
+    pub default_page_width: Option<u32>,
+}
+
 // TODO: adjust font size for scale
 fn create_text_fragments(config: &TextLayerConfig, text: &PdfPageText, scale: f32) -> Vec<PdfText> {
     let words: Vec<PdfText> = text
@@ -110,7 +119,6 @@ pub fn PdfDocument<FalFn, Fal>(
     text_layer_config: MaybeProp<TextLayerConfig>,
     #[prop(optional, into)] set_captured_document_text: Option<WriteSignal<Vec<String>>>,
     #[prop(into, default=1f32.into())] scale: Signal<f32>,
-    #[prop(into, default="20px".into())] page_gap: Signal<String>,
 ) -> impl IntoView
 where
     FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + 'static,

@@ -36,21 +36,20 @@ pub fn PdfPage(
                 .dyn_into::<CanvasRenderingContext2d>()
                 .expect("the 2d context should be of type CanvasRenderingContext2d");
             // log::warn!("{:?}", rendered_page.data());
-            let rendered_page = ImageData::new_with_u8_clamped_array_and_sh(
-                Clamped(&pixels),
-                width,
-                height,
-            )
-            .expect("ImageData to be created without any errors");
+            let rendered_page =
+                ImageData::new_with_u8_clamped_array_and_sh(Clamped(&pixels), width, height)
+                    .expect("ImageData to be created without any errors");
             ctx.put_image_data(&rendered_page, 0f64, 0f64)
                 .expect("put_image_data should not raise NotSupportedError or InvalidStateError");
         }
     });
     let no_text = text_fragments.is_empty();
     view! {
-        <div class="leptos-pdf-page" style:position="relative">
+        <div class="leptos-pdf-page" style:position="relative" style:width=canvas_width.clone() style:height=canvas_height.clone()>
             <Show when=move || !no_text>
-                <div class="leptos-pdf-text-layer">
+                // TODO: instead of styling the width/height, figure out why text layer is 4px taller than canvas height
+                // This might cause a slight shift in the character bounding boxes
+                <div class="leptos-pdf-text-layer" >
                     {text_fragments
                         .iter()
                         .map(|t| {
@@ -74,8 +73,8 @@ pub fn PdfPage(
             <canvas
                 class="leptos-pdf-page-canvas"
                 node_ref=canvas_ref
-                width=canvas_width
-                height=canvas_height
+                width=canvas_width.clone()
+                height=canvas_height.clone()
             />
         </div>
     }
