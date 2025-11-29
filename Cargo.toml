@@ -24,6 +24,7 @@ async-once-cell = "0.5"
 futures = "0.3"
 image = "0.25"
 leptos = "0.7"
+leptos-use = { version = "0.15", features = ["use_element_size"] }
 leptos_meta = "0.7"
 log = "0.4"
 pdfium-render = { version = "0.8", features = ["sync"] }

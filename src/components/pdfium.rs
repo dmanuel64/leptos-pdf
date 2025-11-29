@@ -28,7 +28,8 @@ async fn init_pdfium() {
             }
         }) as Box<dyn FnMut(_)>)
     };
-
+    
+    // Note: maybe look into https://leptos-use.rs/browser/use_event_listener.html
     // Add the event listener
     window()
         .add_event_listener_with_callback(

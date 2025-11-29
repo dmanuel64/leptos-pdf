@@ -4,6 +4,7 @@ use wasm_bindgen::{Clamped, JsCast};
 use web_sys::{CanvasRenderingContext2d, ImageData};
 
 // TODO: this would probably make more sense as a slot
+// TODO: make this similar in DocumentViewerLayout, use u32 and format to px when applying styles
 #[derive(Debug, Clone)]
 pub struct PdfText {
     pub text: String,
