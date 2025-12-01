@@ -1,12 +1,12 @@
 use leptos::{html::Div, prelude::*};
-use leptos_use::{UseElementSizeReturn, use_element_size};
+use leptos_use::{use_element_size, UseElementSizeReturn};
 use pdfium_render::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{RequestInit, RequestMode, Response, js_sys::Uint8Array};
+use web_sys::{js_sys::Uint8Array, RequestInit, RequestMode, Response};
 
 use crate::{
-    components::{PdfPage, pdf_page::PdfText, pdfium::PdfiumInjection},
+    components::{pdf_page::PdfText, pdfium::PdfiumInjection, PdfPage},
     errors::PdfError,
 };
 
@@ -73,13 +73,17 @@ impl Default for DocumentViewerLayout {
             padding: 20,
             gap: 20,
             background: "gray".to_string(),
-            page_scale: 0.75,
+            page_scale: 0.5,
         }
     }
 }
 
 // TODO: adjust font size for scale
-fn create_text_fragments(config: &TextLayerConfig, text: &PdfPageText, scale: f32) -> Vec<PdfText> {
+fn create_text_fragments(
+    config: &TextLayerConfig,
+    text: &PdfPageText,
+    page_scale: f32,
+) -> Vec<PdfText> {
     let words: Vec<PdfText> = text
         .chars()
         .iter()
@@ -92,10 +96,10 @@ fn create_text_fragments(config: &TextLayerConfig, text: &PdfPageText, scale: f3
                 }
                 .expect("bounds should be accessible");
                 let bounds = PdfRect::new_from_values(
-                    bounds.bottom().value * scale,
-                    bounds.left().value * scale,
-                    bounds.top().value * scale,
-                    bounds.right().value * scale,
+                    bounds.bottom().value * page_scale,
+                    bounds.left().value * page_scale,
+                    bounds.top().value * page_scale,
+                    bounds.right().value * page_scale,
                 );
                 PdfText {
                     text: s.clone(),
@@ -111,7 +115,7 @@ fn create_text_fragments(config: &TextLayerConfig, text: &PdfPageText, scale: f3
                             c.unscaled_font_size()
                         })
                         .value
-                            * scale
+                            * page_scale
                     ),
                     bounds: bounds,
                 }
@@ -179,8 +183,8 @@ where
                             .map_err(|e| PdfError::LoadingError(format!("{}", e)))?;
                         let mut views: Vec<AnyView> = Vec::new();
                         let mut captured_document_text: Vec<String> = Vec::new();
-                        let scaled_width = (width.get() as f32 * viewer_layout.get().page_scale) as i32;
-                        let scaled_width_percentage = scaled_width as f32 / width.get() as f32;
+                        let scaled_width = (width.get() as f32 * viewer_layout.get().page_scale)
+                            .round() as i32;
                         for page in pdf.pages().iter() {
                             let text_fragments: Vec<PdfText> = if let Some(text_layer_config) = text_layer_config
                                 .get()
@@ -188,7 +192,7 @@ where
                                 create_text_fragments(
                                     &text_layer_config,
                                     &page.text().expect("page text should be extractable"),
-                                    1f32 // + scaled_width_percentage,
+                                    1f32 + viewer_layout.get().page_scale,
                                 )
                             } else {
                                 vec![]
@@ -199,16 +203,17 @@ where
                                         page.text().expect("page text should be extractable").all(),
                                     );
                             }
-
                             let rendered_page = page
-                                .render_with_config(&PdfRenderConfig::new()// .set_target_width(scaled_width)
-                            )
+                                .render_with_config(
+                                    &PdfRenderConfig::new().set_target_width(scaled_width),
+                                )
                                 .map_err(|e| PdfError::RenderError(format!("{}", e)))?;
                             let pixels: Vec<_> = rendered_page.as_rgba_bytes().to_vec();
                             let width = rendered_page.width() as u32;
                             let height = rendered_page.height() as u32;
                             views
                                 .push(
+
                                     // Workaround by creating an ImageData in Rust
                                     // Issue: https://github.com/wasm-bindgen/wasm-bindgen/issues/4815
                                     // asdf
