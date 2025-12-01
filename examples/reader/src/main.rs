@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use leptos_pdf::components::{PdfDocument, PdfiumProvider, TextLayerConfig};
+use leptos_pdf::prelude::*;
 
 #[component]
 fn App() -> impl IntoView {

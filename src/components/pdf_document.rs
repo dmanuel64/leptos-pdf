@@ -78,7 +78,6 @@ impl Default for DocumentViewerLayout {
     }
 }
 
-// TODO: adjust font size for scale
 fn create_text_fragments(
     config: &TextLayerConfig,
     text: &PdfPageText,
@@ -145,9 +144,15 @@ pub fn PdfDocument<FalFn, Fal>(
     /// Configuration options for the selectable text layer. Not providing a value will not render a text layer
     #[prop(optional, into)]
     text_layer_config: MaybeProp<TextLayerConfig>,
-    #[prop(optional, into)] set_captured_document_text: Option<WriteSignal<Vec<String>>>,
-    #[prop(optional, into)] viewer_layout: Signal<DocumentViewerLayout>,
-    #[prop(default=true.into(), into)] scrollbar: Signal<bool>,
+    /// Optional signal to capture all text in the document
+    #[prop(optional, into)]
+    set_captured_document_text: Option<WriteSignal<Vec<String>>>,
+    /// Layout options for the document viewer
+    #[prop(optional, into)]
+    viewer_layout: Signal<DocumentViewerLayout>,
+    /// Whether to show a scrollbar when the content overflows
+    #[prop(default=true.into(), into)]
+    scrollbar: Signal<bool>,
 ) -> impl IntoView
 where
     FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + 'static,
