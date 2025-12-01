@@ -147,6 +147,7 @@ pub fn PdfDocument<FalFn, Fal>(
     text_layer_config: MaybeProp<TextLayerConfig>,
     #[prop(optional, into)] set_captured_document_text: Option<WriteSignal<Vec<String>>>,
     #[prop(optional, into)] viewer_layout: Signal<DocumentViewerLayout>,
+    #[prop(optional, into)] scrollbar: bool,
 ) -> impl IntoView
 where
     FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + 'static,
@@ -169,6 +170,7 @@ where
             style:background=viewer_layout.get().background
             style:padding=padding
             style:gap=gap
+            style:overflow_y=if scrollbar { "auto" } else { "hidden" }
             node_ref=pdf_document_ref
         >
             <ErrorBoundary fallback=error_fallback>
