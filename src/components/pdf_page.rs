@@ -4,9 +4,8 @@ use wasm_bindgen::{Clamped, JsCast};
 use web_sys::{CanvasRenderingContext2d, ImageData};
 
 // TODO: this would probably make more sense as a slot
-// TODO: make this similar in DocumentViewerLayout, use u32 and format to px when applying styles
 #[derive(Debug, Clone)]
-pub struct PdfText {
+pub struct PdfTextWord {
     pub text: String,
     pub font_family: String,
     /// The size of the font as a valid
@@ -16,13 +15,17 @@ pub struct PdfText {
     pub bounds: PdfRect,
 }
 
-// TODO: text_fragments should probably not be a signal if most other props in this component are not reactive
+#[derive(Debug, Clone)]
+pub struct PdfTextLine {
+    pub words: Vec<PdfTextWord>,
+}
+
 #[component]
 pub fn PdfPage(
     pixels: Vec<u8>,
     width: u32,
     height: u32,
-    text_fragments: Vec<PdfText>,
+    text_fragments: Vec<PdfTextWord>,
 ) -> impl IntoView {
     let canvas_ref = NodeRef::<Canvas>::new();
     let canvas_width = format!("{width}px");

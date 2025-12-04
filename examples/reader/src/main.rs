@@ -13,8 +13,8 @@ fn App() -> impl IntoView {
                         error_fallback=move |e| {
                             log::error!("Error loading PDF document: {:?}", e.get());
                             view! { <p>"An error occurred..."</p> }
-                    }
-                        text_layer_config=TextLayerConfig::default()
+                        }
+                        enable_text_layer=true
                     />
                 </PdfiumProvider>
             </div>
