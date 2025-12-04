@@ -1,75 +1,81 @@
-use std::sync::Arc;
-
-use async_once_cell::OnceCell as AsyncOnceCell;
-use futures::channel::oneshot;
-use leptos::{context::Provider, ev, prelude::*};
+use leptos::{prelude::*, task::spawn_local};
 use leptos_meta::{Script, Style};
-use pdfium_render::prelude::Pdfium;
-use wasm_bindgen::{prelude::Closure, JsCast};
-use web_sys::js_sys;
+use wasm_bindgen::{prelude::*, JsCast};
+use wasm_bindgen_futures::JsFuture;
+use web_sys::js_sys::{self, Function, Promise, Reflect};
 
-static PDFIUM_INIT_CELL: AsyncOnceCell<()> = AsyncOnceCell::new();
+/// Async initializer that does what your JS snippet does.
+pub async fn init_pdfium_in_rust() -> Result<(), JsValue> {
+    let window = window();
 
-async fn init_pdfium() {
-    // This is the one-time, lazy-executed async block.
-    // We do not need to store anything, just await the signal.
-    // Create a oneshot channel to signal when Pdfium is loaded
-    let (tx, rx) = oneshot::channel::<()>();
+    // 1) Get global PDFiumModule function
+    let pdfium_ctor_val = Reflect::get(&window, &JsValue::from_str("PDFiumModule"))?;
+    let pdfium_ctor: Function = pdfium_ctor_val.dyn_into()?;
 
-    // Wrap the sender in an Rc so we can move it into the closure
-    let tx = std::rc::Rc::new(std::cell::RefCell::new(Some(tx)));
+    // 2) Call PDFiumModule() -> Promise
+    let promise_val = pdfium_ctor.call0(&JsValue::UNDEFINED)?;
+    let promise: Promise = promise_val.dyn_into()?;
 
-    // Create the closure for the event listener
-    let closure = {
-        let tx = tx.clone();
-        Closure::wrap(Box::new(move |_event: ev::Event| {
-            if let Some(tx) = tx.borrow_mut().take() {
-                let _ = tx.send(());
-            }
-        }) as Box<dyn FnMut(_)>)
-    };
-    
-    // Note: maybe look into https://leptos-use.rs/browser/use_event_listener.html
-    // Add the event listener
-    window()
-        .add_event_listener_with_callback(
-            "PdfiumRenderInitialized",
-            closure.as_ref().unchecked_ref(),
-        )
-        .expect("failed to add event listener");
+    // 3) Await the Promise to get pdfiumModule
+    let pdfium_module = JsFuture::from(promise).await?;
 
-    // Keep closure alive
-    closure.forget();
+    // 4) Get window.wasmBindings
+    let wasm_bindings = Reflect::get(&window, &JsValue::from_str("wasmBindings"))?;
 
-    // Wait for the signal
-    rx.await
-        .expect("failed to receive PdfiumRenderInitialized signal");
-}
+    // 5) Get wasmBindings.initialize_pdfium_render
+    let init_fn_val = Reflect::get(
+        &wasm_bindings,
+        &JsValue::from_str("initialize_pdfium_render"),
+    )?;
+    let init_fn: Function = init_fn_val.dyn_into()?;
 
-#[derive(Debug, Clone, Copy)]
-pub struct PdfiumInjection;
+    // 6) Call initialize_pdfium_render(pdfiumModule, wasmBindings, false)
+    let result = init_fn.call3(
+        &wasm_bindings,             // this = wasmBindings
+        &pdfium_module,             // arg1: pdfiumModule
+        &wasm_bindings,             // arg2: wasmBindings
+        &JsValue::from_bool(false), // arg3: false
+    )?;
 
-impl PdfiumInjection {
-    pub fn use_context() -> Option<Self> {
-        use_context::<Self>()
+    let ok = result.as_bool().unwrap_or(false);
+    if !ok {
+        web_sys::console::error_1(&JsValue::from_str("Initialization of pdfium-render failed"));
+        return Err(JsValue::from_str("pdfium init failed"));
     }
 
-    pub async fn create_pdfium(&self) -> Arc<Pdfium> {
-        PDFIUM_INIT_CELL.get_or_init(init_pdfium()).await;
-        Arc::new(Pdfium::default())
-    }
+    Ok(())
 }
 
 #[component]
-pub fn PdfiumProvider(#[prop(into)] src: String, children: Children) -> impl IntoView {
-    view! {
-        <Script
-            src
-            on:load=move |_| {
-                let _ = js_sys::eval(include_str!("../../javascript/init_pdfium.js"));
+pub fn PdfiumProvider(#[prop(into)] src: String, mut children: ChildrenFnMut) -> impl IntoView {
+    // Optional: track readiness in Leptos instead of DOM events
+    let initialized = RwSignal::new(false);
+
+    let on_load = move |_| {
+        // Script finished loading, so PDFiumModule should now be on window.
+        spawn_local({
+            // let initialized = initialized;
+            async move {
+                match init_pdfium_in_rust().await {
+                    Ok(()) => {
+                        initialized.set(true);
+                    }
+                    Err(err) => {
+                        web_sys::console::error_1(&JsValue::from_str(
+                            "Pdfium initialization failed in Rust",
+                        ));
+                        web_sys::console::error_1(&err);
+                    }
+                }
             }
-        />
+        });
+    };
+
+    view! {
+        <Script src on:load=on_load />
         <Style>{include_str!("../../style.css")}</Style>
-        <Provider value=PdfiumInjection>{children()}</Provider>
+        {move || {
+            initialized.get().then(|| children())
+        }}
     }
 }

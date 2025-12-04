@@ -1,9 +1,33 @@
-use crate::components::{
-    pdf_document::{DocumentViewerLayout, TextLayerConfig},
-    PdfDocument,
+use crate::{
+    components::{
+        PdfDocument,
+        pdf_document::{DocumentViewerLayout, TextLayerConfig},
+    },
+    errors::PdfError,
 };
 use leptos::prelude::*;
-use web_sys::RequestMode;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
+use web_sys::{Response, js_sys::Uint8Array};
+
+async fn fetch_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
+    let window = window();
+
+    // Fetch the PDF
+    let resp_value = JsFuture::from(window.fetch_with_str(url)).await?;
+    let resp: Response = resp_value
+        .dyn_into()
+        .expect("The return value type of fetch should be a Response");
+
+    // Await the array buffer from the response
+    let abuf_promise = resp.array_buffer()?;
+    let abuf = JsFuture::from(abuf_promise).await?;
+
+    // Convert ArrayBuffer → Uint8Array → Vec<u8>
+    let u8_array = Uint8Array::new(&abuf);
+    let bytes = u8_array.to_vec();
+    Ok(bytes)
+}
 
 #[component]
 pub fn PdfViewer<FalFn, Fal>(
@@ -18,9 +42,6 @@ pub fn PdfViewer<FalFn, Fal>(
     loading_fallback: ViewFnOnce,
     /// View to display if an error is encountered and the PDF cannot be loaded
     error_fallback: FalFn,
-    /// Options for fetching the PDF file
-    #[prop(default=RequestMode::SameOrigin)]
-    mode: RequestMode,
     /// Configuration options for the selectable text layer. Not providing a value will not render a text layer
     #[prop(optional, into)]
     text_layer_config: MaybeProp<TextLayerConfig>,
@@ -35,20 +56,35 @@ pub fn PdfViewer<FalFn, Fal>(
     scrollbar: Signal<bool>,
 ) -> impl IntoView
 where
-    FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + 'static,
+    FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + Copy + 'static,
     Fal: IntoView + Send + 'static,
 {
+    let pdf_bytes = LocalResource::new(move || async move { fetch_bytes(&url.get()).await });
     view! {
-        <PdfDocument
-            url=url
-            password=password
-            loading_fallback=loading_fallback
-            error_fallback=error_fallback
-            mode=mode
-            text_layer_config=text_layer_config
-            // set_captured_document_text=set_captured_document_text
-            viewer_layout=viewer_layout
-            scrollbar=scrollbar
-        />
+        <Transition fallback=loading_fallback>
+            <ErrorBoundary fallback=error_fallback>
+                {move || Suspend::<
+                    Result<AnyView, PdfError>,
+                >::new(async move {
+                    let pdf_bytes = pdf_bytes
+                        .await
+                        .map_err(|e| PdfError::LoadingError(format!("{:?}", e)))?;
+                    Ok(
+                        view! {
+                            <PdfDocument
+                                pdf_bytes=pdf_bytes.clone()
+                                password=password
+                                error_fallback=error_fallback
+                                text_layer_config=text_layer_config
+                                // set_captured_document_text=set_captured_document_text
+                                viewer_layout=viewer_layout
+                                scrollbar=scrollbar
+                            />
+                        }
+                            .into_any(),
+                    )
+                })}
+            </ErrorBoundary>
+        </Transition>
     }
 }

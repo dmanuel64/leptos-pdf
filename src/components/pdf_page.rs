@@ -48,8 +48,6 @@ pub fn PdfPage(
     view! {
         <div class="leptos-pdf-page" style:position="relative" style:width=canvas_width.clone() style:height=canvas_height.clone()>
             <Show when=move || !no_text>
-                // TODO: instead of styling the width/height, figure out why text layer is 4px taller than canvas height
-                // This might cause a slight shift in the character bounding boxes
                 <div class="leptos-pdf-text-layer" >
                     {text_fragments
                         .iter()
