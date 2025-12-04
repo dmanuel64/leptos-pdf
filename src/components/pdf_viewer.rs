@@ -1,14 +1,16 @@
+use std::rc::Rc;
+
 use crate::{
     components::{
-        PdfDocument,
         pdf_document::{DocumentViewerLayout, TextLayerConfig},
+        PdfDocument,
     },
     errors::PdfError,
 };
-use leptos::prelude::*;
+use leptos::{ev::error, prelude::*};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{Response, js_sys::Uint8Array};
+use web_sys::{js_sys::Uint8Array, Response};
 
 async fn fetch_bytes(url: &str) -> Result<Vec<u8>, JsValue> {
     let window = window();
@@ -56,34 +58,38 @@ pub fn PdfViewer<FalFn, Fal>(
     scrollbar: Signal<bool>,
 ) -> impl IntoView
 where
-    FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + Copy + 'static,
+    FalFn: FnMut(ArcRwSignal<Errors>) -> Fal + Send + Clone + 'static,
     Fal: IntoView + Send + 'static,
 {
     let pdf_bytes = LocalResource::new(move || async move { fetch_bytes(&url.get()).await });
     view! {
         <Transition fallback=loading_fallback>
-            <ErrorBoundary fallback=error_fallback>
-                {move || Suspend::<
-                    Result<AnyView, PdfError>,
-                >::new(async move {
-                    let pdf_bytes = pdf_bytes
-                        .await
-                        .map_err(|e| PdfError::LoadingError(format!("{:?}", e)))?;
-                    Ok(
-                        view! {
-                            <PdfDocument
-                                pdf_bytes=pdf_bytes.clone()
-                                password=password
-                                error_fallback=error_fallback
-                                text_layer_config=text_layer_config
-                                // set_captured_document_text=set_captured_document_text
-                                viewer_layout=viewer_layout
-                                scrollbar=scrollbar
-                            />
-                        }
-                            .into_any(),
-                    )
-                })}
+            <ErrorBoundary fallback=error_fallback
+                .clone()>
+                {move || {
+                    let error_fallback = error_fallback.clone();
+                    Suspend::<
+                        Result<AnyView, PdfError>,
+                    >::new(async move {
+                        let pdf_bytes = pdf_bytes
+                            .await
+                            .map_err(|e| PdfError::LoadingError(format!("{:?}", e)))?;
+                        Ok(
+                            view! {
+                                <PdfDocument
+                                    pdf_bytes=pdf_bytes.clone()
+                                    password=password
+                                    error_fallback=error_fallback.clone()
+                                    text_layer_config=text_layer_config
+                                    // set_captured_document_text=set_captured_document_text
+                                    viewer_layout=viewer_layout
+                                    scrollbar=scrollbar
+                                />
+                            }
+                                .into_any(),
+                        )
+                    })
+                }}
             </ErrorBoundary>
         </Transition>
     }
