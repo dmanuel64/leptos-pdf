@@ -8,10 +8,8 @@ use web_sys::{CanvasRenderingContext2d, ImageData};
 pub struct PdfTextWord {
     pub text: String,
     pub font_family: String,
-    /// The size of the font as a valid
-    /// [`<length>`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/length#syntax)
-    /// CSS data type in absolute length units
-    pub font_size: String,
+    /// The size of the font in points
+    pub font_size: f32,
     pub bounds: PdfRect,
 }
 
@@ -60,7 +58,7 @@ pub fn PdfPage(
                             view! {
                                 <span
                                     class="leptos-pdf-text-fragment"
-                                    style:font-size=t.font_size.clone()
+                                    style:font-size=format!("{}pt", t.font_size.clone())
                                     style:left=left
                                     style:top=format!("calc({} - {top})", text_layer_height)
                                     style:font-family=t.font_family.clone()

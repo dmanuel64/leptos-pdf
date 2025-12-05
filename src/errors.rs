@@ -6,6 +6,8 @@ pub enum PdfError {
     LoadingError(String),
     #[error("Failed to render PDF: {0}")]
     RenderError(String),
+    #[error("Failed to extract text from PDF: {0}")]
+    TextExtractionError(String),
 }
 
 #[derive(Debug, Error)]
