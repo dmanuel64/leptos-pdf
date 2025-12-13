@@ -9,7 +9,6 @@ license = "MIT"
 authors = ["Dylan Manuel"]
 documentation = "https://docs.rs/leptos-pdf/latest/leptos_pdf/"
 repository = "https://github.com/dmanuel64/leptos-pdf"
-include = ["/src/**", "/Cargo.toml", "/README.md", "/LICENSE"]
 
 [features]
 pdfium-bundled = ["dep:leptos-pdf-pdfium-bundle"]
