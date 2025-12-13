@@ -1,7 +1,15 @@
 {
   "packages": {
-    ".": {
-      "changelog-path": "CHANGELOG.md",
+    "leptos-pdf": {
+      "changelog-path": "leptos-pdf/CHANGELOG.md",
+      "release-type": "rust",
+      "bump-minor-pre-major": false,
+      "bump-patch-for-minor-pre-major": false,
+      "draft": false,
+      "prerelease": false
+    },
+    "leptos-pdf-pdfium-bundle": {
+      "changelog-path": "leptos-pdf-pdfium-bundle/CHANGELOG.md",
       "release-type": "rust",
       "bump-minor-pre-major": false,
       "bump-patch-for-minor-pre-major": false,

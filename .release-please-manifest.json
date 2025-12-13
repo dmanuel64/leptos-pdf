@@ -1,3 +1,4 @@
 {
-  ".": "0.0.0"
+  "leptos-pdf": "0.7.0",
+  "leptos-pdf-pdfium-bundle": "0.1.0"
 }
