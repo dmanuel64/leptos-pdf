@@ -1,11 +1,11 @@
 use leptos::{prelude::*, task::spawn_local};
 use leptos_meta::{Script, Style};
-use wasm_bindgen::{prelude::*, JsCast};
+use wasm_bindgen::{JsCast, prelude::*};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::js_sys::{self, Function, Promise, Reflect};
 
 /// Async initializer that does what your JS snippet does.
-pub async fn init_pdfium_in_rust() -> Result<(), JsValue> {
+async fn init_pdfium_in_rust() -> Result<(), JsValue> {
     let window = window();
 
     // 1) Get global PDFiumModule function
@@ -44,6 +44,28 @@ pub async fn init_pdfium_in_rust() -> Result<(), JsValue> {
     }
 
     Ok(())
+}
+
+#[cfg(feature = "pdfium-bundled")]
+fn pdfium_blob_urls() -> Result<(String, String), wasm_bindgen::JsValue> {
+    use js_sys::{Array, Uint8Array};
+    use web_sys::{Blob, Url};
+
+    // JS blob
+    let js_blob = Blob::new_with_str_sequence(&wasm_bindgen::JsValue::from_str(
+        leptos_pdf_pdfium_bundle::PDFIUM_JS,
+    ))?;
+    // let js_blob = js_blob.slice_with_i32_and_f64_and_content_type(0, js_blob.size(), "text/javascript")?;
+    let js_url = Url::create_object_url_with_blob(&js_blob)?;
+
+    // WASM blob
+    // let wasm_u8 = Uint8Array::from(leptos_pdf_pdfium_bundle::PDFIUM_WASM);
+    let wasm_blob =
+        Blob::new_with_u8_slice_sequence(&JsValue::from(leptos_pdf_pdfium_bundle::PDFIUM_JS))?;
+    // let wasm_blob = wasm_blob.slice_with_i32_and_f64_and_content_type(0, wasm_blob.size(), "application/wasm")?;
+    let wasm_url = Url::create_object_url_with_blob(&wasm_blob)?;
+
+    Ok((js_url, wasm_url))
 }
 
 #[component]

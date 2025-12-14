@@ -5,12 +5,3 @@ edition = "2021"
 license = "MIT"
 description = "Bundled pdfium JavaScript and WASM for leptos-pdf."
 repository = "https://github.com/dmanuel64/leptos-pdf"
-
-[lib]
-# The `_lib` suffix may seem redundant but it is necessary
-# to make the lib name unique and wouldn't conflict with the bin name.
-# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
-name = "anno_tune_lib"
-# crate-type = ["staticlib", "cdylib", "rlib"]
-
-include = ["src/**", "vendor/**", "Cargo.toml", "/README.md", "/LICENSE"]
