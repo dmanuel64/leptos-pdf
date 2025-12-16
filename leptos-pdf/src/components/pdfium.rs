@@ -93,23 +93,22 @@ pub fn PdfiumProvider(#[prop(into)] src: String, children: ChildrenFn) -> impl I
 pub fn PdfiumProvider(children: ChildrenFn) -> impl IntoView {
     use web_sys::{Blob, Url};
 
+    // WASM blob
+    let wasm_u8 = js_sys::Uint8Array::from(leptos_pdf_pdfium_bundle::PDFIUM_WASM);
+    let wasm_blob = Blob::new_with_u8_array_sequence(&js_sys::Array::of1(&wasm_u8.buffer()))
+        .expect("The Pdfium WASM blob should be created successfully");
+    let wasm_url = Url::create_object_url_with_blob(&wasm_blob)
+        .expect("The URL to the Pdfium WASM blob should be created successfully");
+
     // JS blob
-    let js_blob = Blob::new_with_str_sequence(&wasm_bindgen::JsValue::from_str(
-        leptos_pdf_pdfium_bundle::PDFIUM_JS,
-    ))
-    .expect("The Pdfium JavaScript blob should be created successfully");
-    // let js_blob = js_blob.slice_with_i32_and_f64_and_content_type(0, js_blob.size(), "text/javascript")?;
+    let js_blob =
+        Blob::new_with_str_sequence(&js_sys::Array::of1(&wasm_bindgen::JsValue::from_str(
+            &leptos_pdf_pdfium_bundle::PDFIUM_JS.replacen("pdfium.wasm", &wasm_url, 1),
+        )))
+        .expect("The Pdfium JavaScript blob should be created successfully");
     let js_url = Url::create_object_url_with_blob(&js_blob)
         .expect("The URL to the Pdfium JavaScript blob should be created successfully");
 
-    // WASM blob
-    // let wasm_u8 = Uint8Array::from(leptos_pdf_pdfium_bundle::PDFIUM_WASM);
-    let wasm_blob =
-        Blob::new_with_u8_slice_sequence(&JsValue::from(leptos_pdf_pdfium_bundle::PDFIUM_JS))
-            .expect("The Pdfium WASM blob should be created successfully");
-    // let wasm_blob = wasm_blob.slice_with_i32_and_f64_and_content_type(0, wasm_blob.size(), "application/wasm")?;
-    let _wasm_url = Url::create_object_url_with_blob(&wasm_blob)
-        .expect("The URL to the Pdfium WASM blob should be created successfully");
     view! {
         <PdfiumProviderCore src=js_url>
             {children()}

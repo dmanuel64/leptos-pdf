@@ -910,6 +910,7 @@ name = "leptos-pdf"
 version = "0.7.0"
 dependencies = [
  "leptos",
+ "leptos-pdf-pdfium-bundle",
  "leptos-use",
  "leptos_meta",
  "log",
@@ -930,6 +931,10 @@ dependencies = [
  "leptos-pdf",
  "log",
 ]
+
+[[package]]
+name = "leptos-pdf-pdfium-bundle"
+version = "0.1.0"
 
 [[package]]
 name = "leptos-use"
