@@ -1,0 +1,7 @@
+[package]
+name = "leptos-pdf-pdfium-bundle"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Bundled pdfium JavaScript and WASM for leptos-pdf."
+repository = "https://github.com/dmanuel64/leptos-pdf"

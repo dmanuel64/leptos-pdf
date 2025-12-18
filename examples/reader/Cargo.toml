@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 leptos = { version = "0.7", features = ["csr"] }
-leptos-pdf = { path = "../.." }
+leptos-pdf = { path = "../../leptos-pdf/", features = ["pdfium-bundled"]}
 console_error_panic_hook = "0.1.7"
 console_log = "1.0.0"
 log = "0.4.28"

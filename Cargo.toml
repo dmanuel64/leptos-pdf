@@ -1,28 +1,4 @@
-[package]
-name = "leptos-pdf"
-description = "Leptos components for rendering and viewing PDFs in the browser."
-version = "0.7.0"
-edition = "2024"
-keywords = ["leptos", "pdf", "webassembly", "wasm", "pdfjs"]
-categories = ["web-programming", "wasm", "rendering"]
-license = "MIT"
-authors = ["Dylan Manuel"]
-documentation = "https://docs.rs/leptos-pdf/latest/leptos_pdf/"
-repository = "https://github.com/dmanuel64/leptos-pdf"
-include = [
-    "/src/**",
-    "/bundled_javascript/**",
-    "/styles/**",
-    "/Cargo.toml",
-    "/README.md",
-    "/LICENSE",
-]
-
-
-
-[dependencies]
-leptos = "0.7"
-log = "0.4"
-uuid = { version = "1", features = ["v4", "js"] }
-wasm-bindgen = "0.2"
-wasm-bindgen-futures = "0.4"
+[workspace]
+resolver = "2"
+members = ["leptos-pdf", "leptos-pdf-pdfium-bundle"]
+exclude = ["examples"]
