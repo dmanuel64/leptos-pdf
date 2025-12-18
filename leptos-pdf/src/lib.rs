@@ -7,6 +7,17 @@
 //! It provides an idiomatic Leptos interface for embedding PDFs in Rust + WebAssembly apps, with
 //! canvas-based rendering.
 //!
+//! ## Installation and Supported Leptos Versions
+//! 
+//! Add [`leptos-pdf`](crate) to your project using the version that matches your Leptos version:
+//! 
+//! | **Leptos Version** |        **Command**         |
+//! |:------------------:|:--------------------------:|
+//! | 0.8                | `cargo add leptos-pdf@0.8` |
+//! | 0.7                | `cargo add leptos-pdf@0.7` |
+//! 
+//! Each [`leptos-pdf`](crate) release tracks the same minor version of Leptos (e.g. [`leptos-pdf`](crate) 0.8.x works with [`leptos`] 0.8.x).
+//! 
 //! ## Example
 //!
 //! ```rust
