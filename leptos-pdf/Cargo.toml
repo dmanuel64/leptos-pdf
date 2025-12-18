@@ -27,3 +27,6 @@ web-sys = { version = "0.3", features = [
     "ImageData",
 ] }
 leptos-pdf-pdfium-bundle = { path = "../leptos-pdf-pdfium-bundle", optional = true, version = "*" }
+
+[package.metadata.docs.rs]
+targets = ["wasm32-unknown-unknown"]

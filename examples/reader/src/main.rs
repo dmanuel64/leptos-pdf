@@ -6,8 +6,13 @@ fn App() -> impl IntoView {
     view! {
         <main>
             <div style:width="100vw" style:height="100vh">
-                <PdfiumProvider //src="/public/pdfium/pdfium.js"
-                >
+                <PdfiumProvider>
+                    // If the pdfium-bundled feature is not enabled, you must provide your own URL:
+                    //
+                    // <PdfiumProvider src="/public/pdfium/pdfium.js">
+                    //
+                    // With this setup, make sure that /public/pdfium/pdfium.wasm also exists, and
+                    // you modify your index.html to include these files
                     <PdfViewer
                         url="/public/sample.pdf"
                         loading_fallback=move || view! { <p>"Loading..."</p> }
@@ -15,7 +20,6 @@ fn App() -> impl IntoView {
                             log::error!("Error loading PDF document: {:?}", e.get());
                             view! { <p>"An error occurred..."</p> }
                         }
-                        enable_text_layer=true
                     />
                 </PdfiumProvider>
             </div>

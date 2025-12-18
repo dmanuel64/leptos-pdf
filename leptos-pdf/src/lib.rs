@@ -1,32 +1,99 @@
-//! # `leptos-pdf`
+//! # [`leptos-pdf`](crate)
 //!
-//! `leptos-pdf` is a lightweight Leptos component library for rendering and viewing PDF files
-//! directly in your browser using [PDF.js](https://mozilla.github.io/pdf.js/).
+//! [`leptos-pdf`](crate) is a lightweight Leptos component library for rendering and viewing PDF files
+//! in a Leptos app using [PDFium](https://pdfium.googlesource.com/pdfium/) via the
+//! [`pdfium-render`](https://crates.io/crates/pdfium-render) crate.
 //!
-//! It provides an idiomatic Leptos interface for embedding PDFs in your Rust + WebAssembly
-//! applications - complete with canvas-based renderings, text selection, and reactive props for paging and scaling.
+//! It provides an idiomatic Leptos interface for embedding PDFs in Rust + WebAssembly apps, with
+//! canvas-based rendering.
 //!
 //! ## Example
 //!
 //! ```rust
 //! use leptos::prelude::*;
-//! use leptos_pdf::PdfRenderer;
+//! use leptos_pdf::prelude::*;
 //!
 //! #[component]
 //! fn App() -> impl IntoView {
 //!     view! {
-//!         <div style:width="100vw" style:height="100vh">
-//!             <PdfRenderer url="/public/sample.pdf"/>
-//!         </div>
+//!         <main>
+//!             <div style:width="100vw" style:height="100vh">
+//!                 <PdfiumProvider>
+//!                     // If the pdfium-bundled feature is not enabled, you must provide your own URL:
+//!                     //
+//!                     // <PdfiumProvider src="/public/pdfium/pdfium.js">
+//!                     //
+//!                     // With this setup, make sure that /public/pdfium/pdfium.wasm also exists, and
+//!                     // you modify your index.html to include these files
+//!                     <PdfViewer
+//!                         url="/public/sample.pdf"
+//!                         loading_fallback=move || view! { <p>"Loading..."</p> }
+//!                         error_fallback=move |e| {
+//!                             view! { <p>"An error occurred..."</p> }
+//!                         }
+//!                     />
+//!                 </PdfiumProvider>
+//!             </div>
+//!         </main>
 //!     }
 //! }
 //!
 //! fn main() {
 //!     mount_to_body(App)
 //! }
+//!
 //! ```
 //!
-//! See the [`PdfRenderer`] component for more information on PDF rendering.
+//! See the [`components`] module for more information on PDF rendering.
+//!
+//! ## Getting Started
+//!
+//! PDFium is a vendor dependency (JavaScript + WASM). You can provide it in one of two ways:
+//!
+//! 1. **Manual assets (recommended if you want full control).**
+//!
+//!    Download the PDFium WASM distribution from the
+//!    [pdfium-binaries repository](https://github.com/bblanchon/pdfium-binaries) (grab the latest
+//!    WASM release), and place the files in your app's assets directory (for example, `public/`).
+//!
+//!    If you use Trunk, ensure the directory is copied into the build output:
+//!
+//!    ```html
+//!    <link data-trunk rel="copy-dir" href="public/" />
+//!    ```
+//!
+//!    Then initialize PDFium with [`PdfiumProvider`](crate::components::PdfiumProvider) and point it
+//!    at your `pdfium.js`:
+//!
+//!    ```rust
+//!    use leptos::prelude::*;
+//!    use leptos_pdf::prelude::*;
+//!
+//!    #[component]
+//!    fn Demo() -> impl IntoView {
+//!         view! {
+//!             <PdfiumProvider src="/public/pdfium/pdfium.js">
+//!                 // ...
+//!             </PdfiumProvider>
+//!         }
+//!    }
+//!    ```
+//!
+//!    Make sure the referenced `pdfium.js` can locate its accompanying `pdfium.wasm` (typically by
+//!    keeping them in the same directory).
+//! 
+//!    For more information on how to bundle PDFium, see
+//!    [`pdfium-render`'s guide on compiling to WASM](https://github.com/ajrcarey/pdfium-render/tree/master?tab=readme-ov-file#compiling-to-wasm).
+//!
+//! 2. **Bundled assets (zero setup).**
+//!
+//!    Enable the `pdfium-bundled` feature when adding [`leptos-pdf`](crate). This embeds PDFium's
+//!    JavaScript and WASM bytes into your binary and serves them via `blob:` URLs at runtime.
+//!    This is the easiest option, but the embedded PDFium version are not updated on a fixed schedule.
+//!
+//! ## Features
+//!
+//! - `pdfium-bundled`: Embed PDFium's JavaScript and WASM and serve them via `blob:` URLs at runtime.
 
 pub mod components;
 pub mod errors;

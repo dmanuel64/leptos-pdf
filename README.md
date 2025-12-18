@@ -16,8 +16,8 @@ It provides an idiomatic Leptos interface for embedding PDFs in your Rust + WebA
 
 Add `leptos-pdf` to your project using the version that matches your Leptos version:
 
-| **Leptos Version** |        **Command**       |
-|:------------------:|:------------------------:|
+| **Leptos Version** |        **Command**         |
+|:------------------:|:--------------------------:|
 | 0.8                | `cargo add leptos-pdf@0.8` |
 | 0.7                | `cargo add leptos-pdf@0.7` |
 
