@@ -4,9 +4,11 @@
   "bump-patch-for-minor-pre-major": false,
   "packages": {
     "leptos-pdf": {
+      "component": "leptos-pdf",
       "changelog-path": "leptos-pdf/CHANGELOG.md"
     },
     "leptos-pdf-pdfium-bundle": {
+      "component": "leptos-pdf-pdfium-bundle",
       "changelog-path": "leptos-pdf-pdfium-bundle/CHANGELOG.md"
     }
   },
@@ -14,6 +16,9 @@
   "plugins": [
     {
       "type": "cargo-workspace"
+    },
+    {
+      "type": "sentence-case"
     }
   ]
 }
