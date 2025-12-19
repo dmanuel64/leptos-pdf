@@ -4,12 +4,10 @@
   "bump-patch-for-minor-pre-major": false,
   "packages": {
     "leptos-pdf": {
-      "component": "leptos-pdf",
-      "changelog-path": "leptos-pdf/CHANGELOG.md"
+      "component": "leptos-pdf"
     },
     "leptos-pdf-pdfium-bundle": {
-      "component": "leptos-pdf-pdfium-bundle",
-      "changelog-path": "leptos-pdf-pdfium-bundle/CHANGELOG.md"
+      "component": "leptos-pdf-pdfium-bundle"
     }
   },
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
