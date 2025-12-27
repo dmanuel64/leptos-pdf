@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1](https://github.com/dmanuel64/leptos-pdf/compare/leptos-pdf-pdfium-bundle-v0.1.0...leptos-pdf-pdfium-bundle-v0.1.1) - 2025-12-27
+
+### Other
+
+- release
+
 ## [0.1.0](https://github.com/dmanuel64/leptos-pdf/releases/tag/leptos-pdf-pdfium-bundle-v0.1.0) - 2025-12-27
 
 ### Other
